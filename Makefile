@@ -2,7 +2,7 @@ run-server:
 	cd API && dotnet watch run
 
 create-migration:
-	dotnet ef migrations add InitialCreate -p API -s API -o Data/Migrations
+	dotnet ef migrations add UserPasswordAdded -p API -s API -o Data/Migrations
 
 rollback-migration:
 	dotnet ef migrations remove -p API -s API
