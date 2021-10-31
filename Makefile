@@ -2,7 +2,7 @@ run-server:
 	cd API && dotnet watch run
 
 create-migration:
-	dotnet ef migrations add UserPasswordAdded -p API -s API -o Data/Migrations
+	dotnet ef migrations add ExtendedUserEntity -p API -s API -o Data/Migrations
 
 rollback-migration:
 	dotnet ef migrations remove -p API -s API
@@ -10,5 +10,5 @@ rollback-migration:
 run-migration:
 	dotnet ef database update -p API -s API
 
-drop-data-db:
+drop-db:
 	dotnet ef database drop -p API -s API
