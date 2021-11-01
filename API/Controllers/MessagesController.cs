@@ -50,7 +50,7 @@ namespace API.Controllers
                 Recipient = recipient,
                 SenderUserName = sender.UserName,
                 RecipientUsername = recipient.UserName,
-                MessageSent = DateTime.Now,
+                MessageSent = DateTime.UtcNow,
                 Content = createMessageDto.Content,
             };
 

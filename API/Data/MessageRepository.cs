@@ -17,10 +17,39 @@ namespace API.Data
         private readonly DataContext _context;
         private readonly IMapper _mapper;
 
+        public async Task<Group> GetGroupForConnection(string connectionId)
+        {
+            return await _context.Groups
+                .Include(g => g.Connections)
+                .FirstOrDefaultAsync(g => g.Connections.Any(c => c.ConnectionId == connectionId));
+        }
+
         public MessageRepository(DataContext context, IMapper mapper)
         {
             _mapper = mapper;
             _context = context;
+        }
+
+        public void AddGroup(Group group)
+        {
+            _context.Groups.Add(group);
+        }
+
+        public void RemoveConnection(Connection connection)
+        {
+            _context.Connections.Remove(connection);
+        }
+
+        public async Task<Connection> GetConnection(string connectionId)
+        {
+            return await _context.Connections.FindAsync(connectionId);
+        }
+
+        public async Task<Group> GetMessageGroup(string groupName)
+        {
+            return await _context.Groups
+                .Include(g => g.Connections)
+                .FirstOrDefaultAsync(g => g.Name == groupName);
         }
 
         public void AddMessage(Message message)
@@ -72,7 +101,7 @@ namespace API.Data
             {
                 foreach (var m in unreadMessages)
                 {
-                    m.DateRead = DateTime.Now;
+                    m.DateRead = DateTime.UtcNow;
                 }
 
                 await _context.SaveChangesAsync();
