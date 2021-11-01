@@ -2,7 +2,7 @@ run-server:
 	cd API && dotnet watch run
 
 create-migration:
-	dotnet ef migrations add MessageEntityAdded -p API -s API -o Data/Migrations
+	dotnet ef migrations add IdentityAdded -p API -s API -o Data/Migrations
 
 rollback-migration:
 	dotnet ef migrations remove --force -p API -s API
