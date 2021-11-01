@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -10,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    public class LikeRepository : ILikeRepository
+    public class LikeRepository : ILikesRepository
     {
         private readonly DataContext _context;
 

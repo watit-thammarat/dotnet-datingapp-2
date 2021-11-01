@@ -17,9 +17,7 @@ namespace API.Extensions
 
             services.AddSingleton<PresenceTracker>();
 
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<ILikeRepository, LikeRepository>();
-            services.AddScoped<IMessageRepository, MessageRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IPhotoService, PhotoService>();

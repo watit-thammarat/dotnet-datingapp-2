@@ -19,12 +19,14 @@ namespace API.Controllers
         private readonly IUserRepository _userRepo;
         private readonly IMapper _mapper;
         private readonly IPhotoService _photoService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UsersController(IUserRepository userRepo, IMapper mapper, IPhotoService photoService)
+        public UsersController(IMapper mapper, IPhotoService photoService, IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _photoService = photoService;
-            _userRepo = userRepo;
+            _userRepo = unitOfWork.UserRepository;
         }
 
         [Authorize(Roles = "Admin")]
@@ -32,13 +34,13 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery] UserParams userParams)
         {
             var username = User.GetUsername();
-            var user = await _userRepo.GetUserByUsernameAsync(username);
+            var gender = await _userRepo.GetUserGender(username);
 
             userParams.CurrentUsername = username;
 
             if (string.IsNullOrEmpty(userParams.Gender))
             {
-                userParams.Gender = user.Gender == "male" ? "female" : "male";
+                userParams.Gender = gender == "male" ? "female" : "male";
             }
 
             var members = await _userRepo.GetMembersAsync(userParams);
@@ -71,7 +73,7 @@ namespace API.Controllers
             _mapper.Map(memberUpdateDto, user);
             _userRepo.Update(user);
 
-            if (!await _userRepo.SaveAllAsync())
+            if (!await _unitOfWork.Complete())
             {
                 return BadRequest(new ProblemDetails { Title = "Failed to update user" });
             }
@@ -109,7 +111,7 @@ namespace API.Controllers
             user.Photos.Remove(photo);
             _userRepo.Update(user);
 
-            if (!await _userRepo.SaveAllAsync())
+            if (!await _unitOfWork.Complete())
             {
                 return BadRequest(new ProblemDetails { Title = "Failed to delete photo" });
             }
@@ -139,7 +141,7 @@ namespace API.Controllers
 
             user.Photos.Add(photo);
 
-            if (!await _userRepo.SaveAllAsync())
+            if (!await _unitOfWork.Complete())
             {
                 return BadRequest(new ProblemDetails { Title = "Problem adding photo" });
             }

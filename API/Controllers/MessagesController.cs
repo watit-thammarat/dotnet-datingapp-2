@@ -18,12 +18,14 @@ namespace API.Controllers
         private readonly IUserRepository _userRepo;
         private readonly IMessageRepository _messageRepo;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public MessagesController(IUserRepository userRepo, IMessageRepository messageRepo, IMapper mapper)
+        public MessagesController(IMapper mapper, IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _messageRepo = messageRepo;
-            _userRepo = userRepo;
+            _messageRepo = unitOfWork.MessageRepository;
+            _userRepo = unitOfWork.UserRepository;
         }
 
         [HttpPost]
@@ -56,7 +58,7 @@ namespace API.Controllers
 
             _messageRepo.AddMessage(message);
 
-            if (!await _messageRepo.SaveAllAsync())
+            if (!await _unitOfWork.Complete())
             {
                 return BadRequest(new ProblemDetails { Title = "Failed to send message" });
             }
@@ -83,6 +85,11 @@ namespace API.Controllers
         {
             var currentUsername = User.GetUsername();
             var data = await _messageRepo.GetMessageThread(currentUsername, username);
+
+            if (_unitOfWork.HasChanges())
+            {
+                await _unitOfWork.Complete();
+            }
 
             return Ok(data);
         }
@@ -118,7 +125,7 @@ namespace API.Controllers
                 _messageRepo.DeleteMessage(message);
             }
 
-            if (!await _messageRepo.SaveAllAsync())
+            if (!await _unitOfWork.Complete())
             {
                 return BadRequest(new ProblemDetails { Title = "Failed to delete message" });
             }

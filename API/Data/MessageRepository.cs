@@ -80,7 +80,7 @@ namespace API.Data
                 _ => query.Where(m => m.Recipient.UserName == messageParams.Username && !m.RecipientDeleted && m.DateRead == null),
             };
 
-            var resultQuery = query.ProjectTo<MessageDto>(_mapper.ConfigurationProvider).AsNoTracking();
+            var resultQuery = query.ProjectTo<MessageDto>(_mapper.ConfigurationProvider);
 
             return await PagedList<MessageDto>.CreateAsync(resultQuery, messageParams.PageNumber, messageParams.PageSize);
         }
@@ -103,22 +103,13 @@ namespace API.Data
                 {
                     m.DateRead = DateTime.UtcNow;
                 }
-
-                await _context.SaveChangesAsync();
             }
 
             var resultQuery = query
-                .Include(m => m.Sender).ThenInclude(u => u.Photos)
-                .Include(m => m.Recipient).ThenInclude(u => u.Photos)
                 .OrderBy(m => m.MessageSent)
                 .ProjectTo<MessageDto>(_mapper.ConfigurationProvider);
 
             return await resultQuery.ToListAsync();
-        }
-
-        public async Task<bool> SaveAllAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

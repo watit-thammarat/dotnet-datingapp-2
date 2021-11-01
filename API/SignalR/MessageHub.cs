@@ -17,14 +17,16 @@ namespace API.SignalR
         private readonly IUserRepository _userRepo;
         private readonly IHubContext<PresenceHub> _presenceHub;
         private readonly PresenceTracker _tracker;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public MessageHub(IMessageRepository messageRepo, IMapper mapper, IUserRepository userRepo, IHubContext<PresenceHub> presenceHub, PresenceTracker tracker)
+        public MessageHub(IMapper mapper, IHubContext<PresenceHub> presenceHub, PresenceTracker tracker, IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork;
             _tracker = tracker;
             _presenceHub = presenceHub;
-            _userRepo = userRepo;
             _mapper = mapper;
-            _messageRepo = messageRepo;
+            _userRepo = unitOfWork.UserRepository;
+            _messageRepo = unitOfWork.MessageRepository;
         }
 
         public override async Task OnConnectedAsync()
@@ -41,6 +43,11 @@ namespace API.SignalR
             await Clients.Group(groupName).SendAsync("UpdatedGroup", group);
 
             var messages = await _messageRepo.GetMessageThread(username, otherUser);
+
+            if (_unitOfWork.HasChanges())
+            {
+                await _unitOfWork.Complete();
+            }
 
             await Clients.Caller.SendAsync("ReceivedMessageThread", messages);
         }
@@ -105,7 +112,7 @@ namespace API.SignalR
 
             _messageRepo.AddMessage(message);
 
-            if (!await _messageRepo.SaveAllAsync())
+            if (!await _unitOfWork.Complete())
             {
                 throw new HubException("Failed to send message");
             }
@@ -133,7 +140,7 @@ namespace API.SignalR
 
             group.Connections.Remove(conneciton);
 
-            if (!await _messageRepo.SaveAllAsync())
+            if (!await _unitOfWork.Complete())
             {
                 throw new HubException("Failed to remove from group");
             }
@@ -155,7 +162,7 @@ namespace API.SignalR
 
             group.Connections.Add(connection);
 
-            if (!await _messageRepo.SaveAllAsync())
+            if (!await _unitOfWork.Complete())
             {
                 throw new HubException("Failed to join group");
             }
