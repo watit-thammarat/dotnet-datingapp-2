@@ -20,7 +20,9 @@ namespace API.Entities
         public string City { get; set; }
         public string Country { get; set; }
         public ICollection<Photo> Photos { get; set; } = new List<Photo>();
-        public ICollection<UserLike> LikedByUsers { get; set; }
-        public ICollection<UserLike> LikedUsers { get; set; }
+        public ICollection<UserLike> LikedByUsers { get; set; } = new List<UserLike>();
+        public ICollection<UserLike> LikedUsers { get; set; } = new List<UserLike>();
+        public ICollection<Message> MessageSent { get; set; } = new List<Message>();
+        public ICollection<Message> MessageReceived { get; set; } = new List<Message>();
     }
 }

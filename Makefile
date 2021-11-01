@@ -2,10 +2,10 @@ run-server:
 	cd API && dotnet watch run
 
 create-migration:
-	dotnet ef migrations add LikeEntityAdded -p API -s API -o Data/Migrations
+	dotnet ef migrations add MessageEntityAdded -p API -s API -o Data/Migrations
 
 rollback-migration:
-	dotnet ef migrations remove -p API -s API
+	dotnet ef migrations remove --force -p API -s API
 
 run-migration:
 	dotnet ef database update -p API -s API
